@@ -24,3 +24,5 @@ github.com/pmezard/go-difflib/difflib
 github.com/samgiles/health
 # github.com/stretchr/testify v1.2.2
 github.com/stretchr/testify/assert
+# gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
+gopkg.in/DATA-DOG/go-sqlmock.v1

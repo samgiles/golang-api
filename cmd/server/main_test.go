@@ -122,6 +122,7 @@ func TestApplicationIntegration(t *testing.T) {
 			assert.Equal(t, testOrgId, paymentFirst.OrganisationId)
 			assert.Equal(t, testOrgId, paymentSecond.OrganisationId)
 			assert.Equal(t, paymentFirst.OrganisationId, paymentSecond.OrganisationId)
+			assert.Equal(t, paymentFirst.Id, paymentSecond.Id)
 		})
 	})
 

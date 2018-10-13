@@ -1,5 +1,8 @@
 package main
 
+/* Postgres database connection related helper methods
+ */
+
 import (
 	"database/sql"
 	"fmt"
@@ -16,6 +19,10 @@ func CreateDatabaseConnection(user, password, host, dbname string) (*sql.DB, err
 	return sql.Open("postgres", createConnectionString(user, password, host, dbname))
 }
 
+// Used for integration testing, we can't control the order or when the db will
+// actually be ready to accept connections when creating the integration test
+// environment.  This blocks until we are able to connect so we can be sure a
+// DB exists before running the tests
 func WaitForDbConnectivity(db *sql.DB, timeout time.Duration) error {
 	connectedAck := make(chan bool, 1)
 
@@ -44,6 +51,9 @@ func createConnectionString(user, password, host, dbname string) string {
 	return fmt.Sprintf("postgres://%s:%s@%s:5432/%s", user, password, host, dbname)
 }
 
+// Migrate the database up, we use bindata instead of stuff from the file
+// system because we can package up just a bin, without external dependencies
+// in a FROM scratch dockerfile that way. See build/prod/Dockerfile
 func MigrateDatabaseUp(dbname string, db *sql.DB) error {
 
 	assetSource := bindata.Resource(AssetNames(), Asset)
