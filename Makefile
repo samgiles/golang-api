@@ -13,6 +13,7 @@ integration_test: vendor_deps
 gen_migrations:
 	go-bindata -prefix "migrations/" -nometadata -pkg main ./migrations
 	mv bindata.go cmd/server/db_migrations_bindata.go
+	go fmt cmd/server/db_migrations_bindata.go
 
 vendor_deps:
 	go mod vendor
