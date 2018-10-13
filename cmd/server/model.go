@@ -1,7 +1,9 @@
 package main
 
-import "io"
-import "encoding/json"
+import (
+    "encoding/json"
+	"io"
+)
 
 type MonetaryAmount struct {
 	Amount   string `json:"amount"`
@@ -46,24 +48,26 @@ type PaymentAttributes struct {
 }
 
 type Payment struct {
-	Id             string            `json:"id,omitempty"`
-	OrganisationId string            `json:"organisation_id"`
-	Version        int64             `json:"version"`
-	Attributes     PaymentAttributes `json:"attributes"`
+	Id             string            `json:"id,omitempty" db:"id"`
+	OrganisationId string            `json:"organisation_id" db:"organisation_id"`
+	Version        int64             `json:"version" db:"version"`
+	IdempotencyKey string            `json:"-" db:"idempotency_key"`
+	Attributes     PaymentAttributes `json:"attributes" db:"attributes"`
 }
 
+
 type PaymentStore interface {
-	GetPayment(id string) (*Payment, bool, error)
+	GetPayment(id string) (*Payment, error)
 	GetAllPayments(page, limit int64) ([]Payment, error)
-	CreatePayment(payment Payment, idempotencyKey string) (*Payment, error)
-	UpdatePayment(id string, version int64, payment Payment) (*Payment, error)
+	CreatePayment(payment *Payment) (*Payment, error)
+	UpdatePayment(payment *Payment) (*Payment, error)
 	DeletePayment(id string) error
 }
 
 type EmptyPaymentStore struct{}
 
-func (s *EmptyPaymentStore) GetPayment(id string) (*Payment, bool, error) {
-	return nil, false, nil
+func (s *EmptyPaymentStore) GetPayment(id string) (*Payment, error) {
+	return nil, nil
 }
 
 func (s *EmptyPaymentStore) GetAllPayments(page, limit int64) ([]Payment, error) {
@@ -71,11 +75,11 @@ func (s *EmptyPaymentStore) GetAllPayments(page, limit int64) ([]Payment, error)
 	return emptyList, nil
 }
 
-func (s *EmptyPaymentStore) CreatePayment(payment Payment, idempotencyKey string) (*Payment, error) {
+func (s *EmptyPaymentStore) CreatePayment(payment *Payment) (*Payment, error) {
 	return nil, NewNotFoundError("not found")
 }
 
-func (s *EmptyPaymentStore) UpdatePayment(id string, version int64, payment Payment) (*Payment, error) {
+func (s *EmptyPaymentStore) UpdatePayment(payment *Payment) (*Payment, error) {
 	return nil, NewNotFoundError("not found")
 }
 

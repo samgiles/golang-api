@@ -1,8 +1,8 @@
-build:
+build: gen_migrations
 	go build ./...
 	mv ./server ./server.out
 
-full: | test integration_test
+full: | gen_migrations test integration_test
 
 test:
 	go test ./... -v -short
@@ -17,4 +17,4 @@ gen_migrations:
 vendor_deps:
 	go mod vendor
 
-.PHONY: integration_test vendor_deps test
+.PHONY: integration_test vendor_deps test build

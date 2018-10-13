@@ -21,7 +21,7 @@ func NewServer(db *sql.DB) *Server {
 	server.DB = db
 	server.Router = mux.NewRouter()
 
-	server.paymentController = NewPaymentController(&EmptyPaymentStore{})
+	server.paymentController = NewPaymentController(NewPostgresPaymentStore(db))
 	server.paymentController.SetupRoutes(server.Router)
 
 	return &server

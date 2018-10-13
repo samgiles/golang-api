@@ -41,7 +41,10 @@ func (c *PaymentController) CreatePayment(w http.ResponseWriter, r *http.Request
 		idemKey = uuid.New().String()
 	}
 
-	createdPayment, createErr := c.store.CreatePayment(payment, idemKey)
+	payment.Id = uuid.New().String()
+	payment.IdempotencyKey = idemKey
+
+	createdPayment, createErr := c.store.CreatePayment(&payment)
 
 	if createErr != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -76,10 +79,11 @@ func (c *PaymentController) GetPayment(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
-	payment, exists, _ := c.store.GetPayment(id)
+	payment, err := c.store.GetPayment(id)
 
-	if !exists {
+	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -102,7 +106,8 @@ func (c *PaymentController) UpdatePayment(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	updatedPayment, err := c.store.UpdatePayment(id, payment.Version, payment)
+	payment.Id = id
+	updatedPayment, err := c.store.UpdatePayment(&payment)
 
 	if err != nil {
 		switch err.(type) {

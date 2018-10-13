@@ -20,7 +20,7 @@ const testOrgId = "743d5b63-8e6f-432e-a8fa-c5d8d2ee5fcb"
 var server *Server
 
 func setUpApplication() error {
-    testDbName := os.Getenv("TEST_DB_NAME")
+	testDbName := os.Getenv("TEST_DB_NAME")
 	db, err := CreateDatabaseConnection(
 		os.Getenv("TEST_DB_USERNAME"),
 		os.Getenv("TEST_DB_PASSWORD"),
@@ -34,7 +34,7 @@ func setUpApplication() error {
 	server = NewServer(db)
 
 	log.Println("Starting DB connection wait")
-	err = WaitForDbConnectivity(db, 10 * time.Second)
+	err = WaitForDbConnectivity(db, 10*time.Second)
 
 	if err != nil {
 		return err
@@ -42,18 +42,19 @@ func setUpApplication() error {
 
 	log.Println("Connected to DB successfully")
 
-    log.Println("Migrating database up..")
-    err = MigrateDatabaseUp(testDbName, db)
+	log.Println("Migrating database up..")
+	err = MigrateDatabaseUp(testDbName, db)
 
-    if err != nil {
-        return err
-    }
+	if err != nil {
+		return err
+	}
 
-    log.Println("Migrated database up")
+	log.Println("Migrated database up")
 	return nil
 }
 
 func clearDb() {
+    server.DB.Exec("TRUNCATE TABLE payments;")
 }
 
 func TestApplicationIntegration(t *testing.T) {
@@ -63,7 +64,7 @@ func TestApplicationIntegration(t *testing.T) {
 
 	if err := setUpApplication(); err != nil {
 		t.Errorf("Failed to start application under test: %s", err)
-        return
+		return
 	}
 
 	t.Run("POST /payments", func(t *testing.T) {
