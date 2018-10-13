@@ -90,7 +90,51 @@ func (s *PostgresPaymentStore) CreatePayment(payment *Payment) (*Payment, error)
 }
 
 func (s *PostgresPaymentStore) UpdatePayment(payment *Payment) (*Payment, error) {
-	return nil, NewNotFoundError("not found")
+	// Use a CTE (common table expression) to capture the result of the update
+	// so we can check whether we updated the id with the expected previous
+	// version. This allows us to easily check the version update and whether
+	// the id even exists in one statement. with the default iso level, READ
+	// COMMITTED we won't overwrite data in the update thanks to the where
+	// clause checking a committed version.
+	query := `WITH updated_record AS ( UPDATE payments SET (version, organisation_id, attributes) = ($1, $2, $3) WHERE id = $4 AND version = $5 RETURNING *)
+    (SELECT id, version, organisation_id, attributes FROM payments WHERE id = $4 UNION SELECT id, version, organisation_id, attributes FROM updated_record) LIMIT 2;`
+
+	// TODO: Maybe versions should be opaque and non-sequential to avoid the
+	// possibility of a client forcing an update by guessing the current db
+	// version
+	newVersion := payment.Version + 1
+	rows, err := s.db.Query(query, newVersion, payment.OrganisationId, payment.Attributes, payment.Id, payment.Version)
+
+	switch err {
+	case nil:
+		break
+	case sql.ErrNoRows:
+		log.Printf("db_paymentstore: UPDATE ID NOT FOUND %s", payment.Id)
+		return nil, NewNotFoundError("id not found")
+	default:
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var latestPayment Payment
+
+	for rows.Next() {
+		if err := rows.Scan(&latestPayment.Id, &latestPayment.Version, &latestPayment.OrganisationId, &latestPayment.Attributes); err != nil {
+			return nil, err
+		}
+	}
+
+	// Return the DBs latest version, but also send a conflict error
+	if latestPayment.Version != newVersion {
+		log.Printf("db_paymentstore: update payment version mismatch expected version %d, actual %d", newVersion, latestPayment.Version)
+		return &latestPayment, NewDocumentConflictError("conflict")
+	}
+
+	log.Printf("Updated to version %d", latestPayment.Version)
+
+	// Return the updated latest version
+	return &latestPayment, nil
 }
 
 func (s *PostgresPaymentStore) DeletePayment(id string) error {
