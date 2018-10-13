@@ -25,11 +25,17 @@ func MigrateDatabaseUp(dbname string, db *sql.DB) error {
 		return err
 	}
 
-	migrate, err := migrate.NewWithInstance("go-bindata", sourceDriver, dbname, dbDriver)
+	m, err := migrate.NewWithInstance("go-bindata", sourceDriver, dbname, dbDriver)
 
 	if err != nil {
 		return err
 	}
 
-	return migrate.Up()
+	err = m.Up()
+
+    if err != migrate.ErrNoChange {
+        return err
+    }
+
+    return nil
 }

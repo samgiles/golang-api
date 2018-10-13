@@ -6,6 +6,9 @@ import (
 	"net"
 	"net/http"
 	"os"
+
+    "github.com/gorilla/handlers"
+    "github.com/samgiles/health"
 )
 
 type Server struct {
@@ -13,6 +16,7 @@ type Server struct {
 	DB     *sql.DB
 
 	paymentController PaymentController
+    healthController health.HealthCheckController
 }
 
 func NewServer(db *sql.DB) *Server {
@@ -23,12 +27,17 @@ func NewServer(db *sql.DB) *Server {
 
 	server.paymentController = NewPaymentController(NewPostgresPaymentStore(db))
 	server.paymentController.SetupRoutes(server.Router)
+	server.healthController = health.NewHealthCheckController()
 
 	return &server
 }
 
 func (s *Server) Start() error {
-	return http.ListenAndServe(getListenAddr(), s.Router)
+	return http.ListenAndServe(getListenAddr(), handlers.CombinedLoggingHandler(os.Stdout, s.Router))
+}
+
+func (s *Server) Stop() {
+    s.healthController.Stop()
 }
 
 func getListenAddr() string {
