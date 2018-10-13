@@ -33,9 +33,9 @@ func MigrateDatabaseUp(dbname string, db *sql.DB) error {
 
 	err = m.Up()
 
-    if err != migrate.ErrNoChange {
-        return err
-    }
+	if err != migrate.ErrNoChange {
+		return err
+	}
 
-    return nil
+	return nil
 }

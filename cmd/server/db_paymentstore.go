@@ -1,12 +1,12 @@
 package main
 
 import (
-    "errors"
-	"encoding/json"
 	"database/sql"
 	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	"github.com/lib/pq"
-    "log"
+	"log"
 )
 
 type PostgresPaymentStore struct {
@@ -24,64 +24,64 @@ func (s *PostgresPaymentStore) GetPayment(id string) (*Payment, error) {
 	err := s.db.QueryRow(query, id).Scan(&p.Version, &p.OrganisationId, &p.Attributes)
 
 	if err != nil {
-        switch err {
-        case sql.ErrNoRows:
-            return nil, NewNotFoundError(err.Error())
-        default:
-		    log.Printf("Error getting payment: %s", err.Error())
-            return nil, err
-        }
+		switch err {
+		case sql.ErrNoRows:
+			return nil, NewNotFoundError(err.Error())
+		default:
+			log.Printf("Error getting payment: %s", err.Error())
+			return nil, err
+		}
 	}
 
 	return &p, nil
 }
 
 func (s *PostgresPaymentStore) GetAllPayments() ([]Payment, error) {
-    query := "SELECT id, version, organisation_id, attributes FROM payments LIMIT $1;"
+	query := "SELECT id, version, organisation_id, attributes FROM payments LIMIT $1;"
 
-    // TODO: offset/limit based pagination - or a more scalable forward cursor based pagination?
-    rows, err := s.db.Query(query, 100)
+	// TODO: offset/limit based pagination - or a more scalable forward cursor based pagination?
+	rows, err := s.db.Query(query, 100)
 
-    switch err {
-    case nil:
-        break
-    case sql.ErrNoRows:
-        return make([]Payment, 0), nil
-    default:
-        return nil, err
-    }
+	switch err {
+	case nil:
+		break
+	case sql.ErrNoRows:
+		return make([]Payment, 0), nil
+	default:
+		return nil, err
+	}
 
-    defer rows.Close()
+	defer rows.Close()
 
-    payments := make([]Payment, 0)
+	payments := make([]Payment, 0)
 
-    for rows.Next() {
-        payment := Payment{}
-        if err := rows.Scan(&payment.Id, &payment.Version, &payment.OrganisationId, &payment.Attributes); err != nil {
-            return nil, err
-        }
+	for rows.Next() {
+		payment := Payment{}
+		if err := rows.Scan(&payment.Id, &payment.Version, &payment.OrganisationId, &payment.Attributes); err != nil {
+			return nil, err
+		}
 
-        payments = append(payments, payment)
-    }
+		payments = append(payments, payment)
+	}
 
-    if err := rows.Err(); err != nil {
-        return nil, err
-    }
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 
 	return payments, nil
 }
 
 func (s *PostgresPaymentStore) CreatePayment(payment *Payment) (*Payment, error) {
-    query := "SELECT id FROM InsertPaymentIdempotent($1,$2,$3,$4,$5);"
+	query := "SELECT id FROM InsertPaymentIdempotent($1,$2,$3,$4,$5);"
 
 	err := s.db.QueryRow(query, payment.Id, payment.IdempotencyKey, payment.Version, payment.OrganisationId, payment.Attributes).Scan(&payment.Id)
 
 	if err != nil {
-        pqerr, ok := err.(*pq.Error)
+		pqerr, ok := err.(*pq.Error)
 
-        if ok {
-            return nil, convertPqError(pqerr)
-        }
+		if ok {
+			return nil, convertPqError(pqerr)
+		}
 
 		return nil, err
 	}
@@ -94,26 +94,26 @@ func (s *PostgresPaymentStore) UpdatePayment(payment *Payment) (*Payment, error)
 }
 
 func (s *PostgresPaymentStore) DeletePayment(id string) error {
-    query := "DELETE FROM payments WHERE id = $1;"
+	query := "DELETE FROM payments WHERE id = $1;"
 	result, err := s.db.Exec(query, id)
 
-    if err != nil {
-        switch err {
-        case sql.ErrNoRows:
-            return NewNotFoundError(err.Error())
-        default:
-            return err
-        }
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return NewNotFoundError(err.Error())
+		default:
+			return err
+		}
 	}
 
-    rows, err := result.RowsAffected();
-    if err != nil {
-        return err
-    }
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
 
-    if rows == 0 {
-        return NewNotFoundError("payment not found")
-    }
+	if rows == 0 {
+		return NewNotFoundError("payment not found")
+	}
 
 	return nil
 }
@@ -135,10 +135,10 @@ func (attr *PaymentAttributes) Scan(src interface{}) error {
 }
 
 func convertPqError(err *pq.Error) error {
-    switch err.Code {
-    case "23505":
-        return NewDocumentConflictError("")
-    default:
-        return err
-    }
+	switch err.Code {
+	case "23505":
+		return NewDocumentConflictError("")
+	default:
+		return err
+	}
 }

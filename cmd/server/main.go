@@ -1,9 +1,9 @@
 package main
 
 import (
-    "log"
-    "os"
-    "reflect"
+	"log"
+	"os"
+	"reflect"
 )
 
 func main() {
@@ -15,19 +15,19 @@ func main() {
 		dbName)
 
 	if err != nil {
-        log.Fatalf("main: could not create db conn: %s", err)
+		log.Fatalf("main: could not create db conn: %s", err)
 	}
 
-    log.Println("main: migrating database up..")
-    err = MigrateDatabaseUp(dbName, db)
+	log.Println("main: migrating database up..")
+	err = MigrateDatabaseUp(dbName, db)
 
-    if err != nil {
-        log.Printf("main: type %s", reflect.TypeOf(err))
-        log.Fatalf("main: could not migrate db: %s", err)
-    }
-    log.Println("main: migrated database up..")
+	if err != nil {
+		log.Printf("main: type %s", reflect.TypeOf(err))
+		log.Fatalf("main: could not migrate db: %s", err)
+	}
+	log.Println("main: migrated database up..")
 
-    server := NewServer(db)
-    defer server.Stop()
-    server.Start()
+	server := NewServer(db)
+	defer server.Stop()
+	server.Start()
 }

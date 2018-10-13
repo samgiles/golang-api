@@ -54,7 +54,7 @@ func setUpApplication() error {
 }
 
 func clearDb() {
-    server.DB.Exec("TRUNCATE TABLE payments;")
+	server.DB.Exec("TRUNCATE TABLE payments;")
 }
 
 func TestApplicationIntegration(t *testing.T) {

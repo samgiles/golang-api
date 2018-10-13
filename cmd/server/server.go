@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"os"
 
-    "github.com/gorilla/handlers"
-    "github.com/samgiles/health"
+	"github.com/gorilla/handlers"
+	"github.com/samgiles/health"
 )
 
 type Server struct {
@@ -16,7 +16,7 @@ type Server struct {
 	DB     *sql.DB
 
 	paymentController PaymentController
-    healthController health.HealthCheckController
+	healthController  health.HealthCheckController
 }
 
 func NewServer(db *sql.DB) *Server {
@@ -37,7 +37,7 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) Stop() {
-    s.healthController.Stop()
+	s.healthController.Stop()
 }
 
 func getListenAddr() string {

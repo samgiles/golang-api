@@ -1,7 +1,7 @@
 package main
 
 import (
-    "encoding/json"
+	"encoding/json"
 	"io"
 )
 
@@ -54,7 +54,6 @@ type Payment struct {
 	IdempotencyKey string            `json:"-" db:"idempotency_key"`
 	Attributes     PaymentAttributes `json:"attributes" db:"attributes"`
 }
-
 
 type PaymentStore interface {
 	GetPayment(id string) (*Payment, error)
