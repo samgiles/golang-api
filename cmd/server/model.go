@@ -60,6 +60,29 @@ type PaymentStore interface {
 	DeletePayment(id string) error
 }
 
+type EmptyPaymentStore struct{}
+
+func (s *EmptyPaymentStore) GetPayment(id string) (*Payment, bool, error) {
+	return nil, false, nil
+}
+
+func (s *EmptyPaymentStore) GetAllPayments(page, limit int64) ([]Payment, error) {
+	emptyList := make([]Payment, 0)
+	return emptyList, nil
+}
+
+func (s *EmptyPaymentStore) CreatePayment(payment Payment, idempotencyKey string) (*Payment, error) {
+	return nil, NewNotFoundError("not found")
+}
+
+func (s *EmptyPaymentStore) UpdatePayment(id string, version int64, payment Payment) (*Payment, error) {
+	return nil, NewNotFoundError("not found")
+}
+
+func (s *EmptyPaymentStore) DeletePayment(id string) error {
+	return NewNotFoundError("not found")
+}
+
 func UnmarshalPayment(data io.ReadCloser) (Payment, error) {
 	var payment Payment
 	decoder := json.NewDecoder(data)

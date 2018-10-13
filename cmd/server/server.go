@@ -11,6 +11,8 @@ import (
 type Server struct {
 	Router *mux.Router
 	DB     *sql.DB
+
+	paymentController PaymentController
 }
 
 func NewServer(db *sql.DB) *Server {
@@ -18,6 +20,10 @@ func NewServer(db *sql.DB) *Server {
 
 	server.DB = db
 	server.Router = mux.NewRouter()
+
+	server.paymentController = NewPaymentController(&EmptyPaymentStore{})
+	server.paymentController.SetupRoutes(server.Router)
+
 	return &server
 }
 

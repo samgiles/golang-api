@@ -19,4 +19,5 @@ services:
         TEST_DB_USERNAME: testuser
         TEST_DB_PASSWORD: testpass
         TEST_DB_NAME: paymentsdb
+        TEST_DB_HOST: db
         PGSSLMODE: disable
