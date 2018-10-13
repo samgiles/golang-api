@@ -1,0 +1,22 @@
+version: '3.1'
+
+services:
+  db:
+    image: postgres:10-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: testpass
+      POSTGRES_USER: testuser
+      POSTGRES_DB: paymentsdb
+
+  int_tests:
+    build:
+        context: ../..
+        dockerfile: build/integration/Dockerfile
+    depends_on:
+        - db
+    environment:
+        TEST_DB_USERNAME: testuser
+        TEST_DB_PASSWORD: testpass
+        TEST_DB_NAME: paymentsdb
+        PGSSLMODE: disable

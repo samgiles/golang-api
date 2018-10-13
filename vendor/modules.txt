@@ -1,0 +1,15 @@
+# github.com/davecgh/go-spew v1.1.1
+github.com/davecgh/go-spew/spew
+# github.com/gorilla/context v1.1.1
+github.com/gorilla/context
+# github.com/gorilla/mux v1.6.2
+github.com/gorilla/mux
+# github.com/lib/pq v1.0.0
+github.com/lib/pq
+github.com/lib/pq/oid
+# github.com/pmezard/go-difflib v1.0.0
+github.com/pmezard/go-difflib/difflib
+# github.com/samgiles/health v0.0.0-20181011181323-2c5ccebfeb2f
+github.com/samgiles/health
+# github.com/stretchr/testify v1.2.2
+github.com/stretchr/testify/assert
