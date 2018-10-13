@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+    "log"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -49,6 +50,7 @@ func (c *PaymentController) CreatePayment(w http.ResponseWriter, r *http.Request
 	if createErr != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(createErr.Error()))
+        log.Printf("err: %s", err.Error())
 		return
 	}
 
@@ -60,11 +62,12 @@ func (c *PaymentController) CreatePayment(w http.ResponseWriter, r *http.Request
 }
 
 func (c *PaymentController) ListPayments(w http.ResponseWriter, r *http.Request) {
-	payments, err := c.store.GetAllPayments(0, 100)
+	payments, err := c.store.GetAllPayments()
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
+        log.Printf("err: %s", err.Error())
 		return
 	}
 
@@ -84,6 +87,7 @@ func (c *PaymentController) GetPayment(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(err.Error()))
+        log.Printf("err: %s", err.Error())
 		return
 	}
 
@@ -119,6 +123,7 @@ func (c *PaymentController) UpdatePayment(w http.ResponseWriter, r *http.Request
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
+        log.Printf("err: %s", err.Error())
 		w.Write([]byte(err.Error()))
 		return
 	}
@@ -141,6 +146,7 @@ func (c *PaymentController) DeletePayment(w http.ResponseWriter, r *http.Request
 		case *NotFoundError:
 			w.WriteHeader(http.StatusNotFound)
 		default:
+            log.Printf("err: %s", err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 

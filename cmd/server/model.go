@@ -58,7 +58,7 @@ type Payment struct {
 
 type PaymentStore interface {
 	GetPayment(id string) (*Payment, error)
-	GetAllPayments(page, limit int64) ([]Payment, error)
+	GetAllPayments() ([]Payment, error)
 	CreatePayment(payment *Payment) (*Payment, error)
 	UpdatePayment(payment *Payment) (*Payment, error)
 	DeletePayment(id string) error
@@ -70,7 +70,7 @@ func (s *EmptyPaymentStore) GetPayment(id string) (*Payment, error) {
 	return nil, nil
 }
 
-func (s *EmptyPaymentStore) GetAllPayments(page, limit int64) ([]Payment, error) {
+func (s *EmptyPaymentStore) GetAllPayments() ([]Payment, error) {
 	emptyList := make([]Payment, 0)
 	return emptyList, nil
 }
