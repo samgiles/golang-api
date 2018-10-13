@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"reflect"
 )
 
 func main() {
@@ -22,11 +21,12 @@ func main() {
 	err = MigrateDatabaseUp(dbName, db)
 
 	if err != nil {
-		log.Printf("main: type %s", reflect.TypeOf(err))
 		log.Fatalf("main: could not migrate db: %s", err)
 	}
+
 	log.Println("main: migrated database up..")
 
+	log.Println("main: starting server")
 	server := NewServer(db)
 	defer server.Stop()
 	server.Start()

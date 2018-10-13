@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"github.com/gorilla/mux"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -33,7 +34,9 @@ func NewServer(db *sql.DB) *Server {
 }
 
 func (s *Server) Start() error {
-	return http.ListenAndServe(getListenAddr(), handlers.CombinedLoggingHandler(os.Stdout, s.Router))
+	addr := getListenAddr()
+	log.Printf("server: starting http listener on %s", addr)
+	return http.ListenAndServe(addr, handlers.CombinedLoggingHandler(os.Stdout, s.Router))
 }
 
 func (s *Server) Stop() {
