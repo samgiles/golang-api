@@ -55,6 +55,15 @@ type Payment struct {
 	Attributes     PaymentAttributes `json:"attributes" db:"attributes"`
 }
 
+type ErrorResponse struct {
+	Message    string `json:"message"`
+	StatusCode int    `json:"status_code"`
+}
+
+func NewErrorResponse(message string, status int) ErrorResponse {
+	return ErrorResponse{Message: message, StatusCode: status}
+}
+
 type PaymentStore interface {
 	GetPayment(id string) (*Payment, error)
 	GetAllPayments() ([]Payment, error)

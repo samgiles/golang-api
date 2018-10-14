@@ -26,12 +26,12 @@ func (c *PaymentController) SetupRoutes(router *mux.Router) {
 }
 
 func (c *PaymentController) CreatePayment(w http.ResponseWriter, r *http.Request) {
-
+	w.Header().Set("Content-Type", "application/json")
 	payment, err := UnmarshalPayment(r.Body)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		writeJsonResponse(w, NewErrorResponse(err.Error(), http.StatusBadRequest))
 		return
 	}
 
@@ -49,36 +49,32 @@ func (c *PaymentController) CreatePayment(w http.ResponseWriter, r *http.Request
 
 	if createErr != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(createErr.Error()))
+		writeJsonResponse(w, NewErrorResponse(err.Error(), http.StatusInternalServerError))
 		log.Printf("err: %s", err.Error())
 		return
 	}
 
-	jsonResponse, _ := json.Marshal(createdPayment)
-
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	w.Write(jsonResponse)
+	writeJsonResponse(w, createdPayment)
 }
 
 func (c *PaymentController) ListPayments(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	payments, err := c.store.GetAllPayments()
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		writeJsonResponse(w, NewErrorResponse(err.Error(), http.StatusInternalServerError))
 		log.Printf("err: %s", err.Error())
 		return
 	}
 
-	jsonResponse, _ := json.Marshal(payments)
-
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(jsonResponse)
+	writeJsonResponse(w, payments)
 }
 
 func (c *PaymentController) GetPayment(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	id := vars["id"]
 
@@ -86,19 +82,17 @@ func (c *PaymentController) GetPayment(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(err.Error()))
+		writeJsonResponse(w, NewErrorResponse(err.Error(), http.StatusNotFound))
 		log.Printf("err: %s", err.Error())
 		return
 	}
 
-	jsonResponse, _ := json.Marshal(payment)
-
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(jsonResponse)
+	writeJsonResponse(w, payment)
 }
 
 func (c *PaymentController) UpdatePayment(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	id := vars["id"]
 
@@ -106,7 +100,7 @@ func (c *PaymentController) UpdatePayment(w http.ResponseWriter, r *http.Request
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		writeJsonResponse(w, NewErrorResponse(err.Error(), http.StatusBadRequest))
 		return
 	}
 
@@ -114,45 +108,52 @@ func (c *PaymentController) UpdatePayment(w http.ResponseWriter, r *http.Request
 	updatedPayment, err := c.store.UpdatePayment(&payment)
 
 	if err != nil {
+		var responseCode int
 		switch err.(type) {
 		case *DocumentConflictError:
-			w.WriteHeader(http.StatusConflict)
+			responseCode = http.StatusConflict
 		case *NotFoundError:
-			w.WriteHeader(http.StatusNotFound)
+			responseCode = http.StatusNotFound
 		default:
-			w.WriteHeader(http.StatusInternalServerError)
+			responseCode = http.StatusInternalServerError
 		}
 
+		w.WriteHeader(responseCode)
+		writeJsonResponse(w, NewErrorResponse(err.Error(), responseCode))
 		log.Printf("err: %s", err.Error())
-		w.Write([]byte(err.Error()))
 		return
 	}
 
-	jsonResponse, _ := json.Marshal(updatedPayment)
-
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(jsonResponse)
+	writeJsonResponse(w, updatedPayment)
 }
 
 func (c *PaymentController) DeletePayment(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	id := vars["id"]
 
 	err := c.store.DeletePayment(id)
 
 	if err != nil {
+		var responseCode int
 		switch err.(type) {
 		case *NotFoundError:
-			w.WriteHeader(http.StatusNotFound)
+			responseCode = http.StatusNotFound
 		default:
 			log.Printf("err: %s", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
+			responseCode = http.StatusInternalServerError
 		}
 
-		w.Write([]byte(err.Error()))
+		w.WriteHeader(responseCode)
+		writeJsonResponse(w, NewErrorResponse(err.Error(), responseCode))
 		return
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func writeJsonResponse(w http.ResponseWriter, obj interface{}) {
+	jsonResponse, _ := json.Marshal(obj)
+	w.Write(jsonResponse)
 }
