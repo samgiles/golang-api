@@ -7,8 +7,11 @@ full: | gen_migrations test integration_test
 test:
 	go test ./... -v -short
 
-integration_test: vendor_deps
+integration_test: | vendor_deps ci
+
+ci:
 	./build/integration/int-test.sh
+
 
 gen_migrations:
 	go-bindata -prefix "migrations/" -nometadata -pkg main ./migrations
@@ -18,4 +21,4 @@ gen_migrations:
 vendor_deps:
 	go mod vendor
 
-.PHONY: integration_test vendor_deps test build
+.PHONY: integration_test vendor_deps test build ci

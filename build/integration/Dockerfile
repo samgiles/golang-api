@@ -9,4 +9,4 @@ RUN mkdir -p /app/cmd/server
 COPY --from=builder /src/test/ /app/test/
 COPY --from=builder /src/server.test /app/cmd/server/
 WORKDIR /app/cmd/server
-CMD ["./server.test", "-test.run=Integration", "-test.v"]
+CMD ["./server.test", "-test.v"]
