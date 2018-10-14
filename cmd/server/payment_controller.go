@@ -112,6 +112,11 @@ func (c *PaymentController) UpdatePayment(w http.ResponseWriter, r *http.Request
 		switch err.(type) {
 		case *DocumentConflictError:
 			responseCode = http.StatusConflict
+            if updatedPayment != nil {
+                w.WriteHeader(responseCode)
+                writeJsonResponse(w, updatedPayment)
+                return
+            }
 		case *NotFoundError:
 			responseCode = http.StatusNotFound
 		default:

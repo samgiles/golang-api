@@ -227,6 +227,9 @@ func TestApplicationIntegration(t *testing.T) {
 		})
 
 		t.Run("A conflict status code should be returned if the client version is behind the server's version", func(t *testing.T) {
+            // Additionally, it should return the latest version in the body
+            // for convenience
+
 			defer clearDb()
 			paymentCreated := createNewPayment(t)
 
@@ -245,6 +248,10 @@ func TestApplicationIntegration(t *testing.T) {
 			putReq, _ := http.NewRequest("PUT", resourcePath, bytes.NewBuffer(json))
 			putResponse := executeRequest(putReq)
 			checkResponseCode(t, http.StatusConflict, putResponse.Code)
+
+            payment := readPaymentResponse(putResponse.Body.Bytes())
+            assert.Equal(t, paymentCreated.Id, payment.Id)
+            assert.Equal(t, int64(0), payment.Version)
 		})
 	})
 }

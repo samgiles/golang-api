@@ -14,7 +14,7 @@ ci:
 
 
 gen_migrations:
-	go get -u github.com/jteeuwen/go-bindata/...
+	go get github.com/jteeuwen/go-bindata/...
 	go-bindata -prefix "migrations/" -nometadata -pkg main ./migrations
 	mv bindata.go cmd/server/db_migrations_bindata.go
 	go fmt cmd/server/db_migrations_bindata.go
