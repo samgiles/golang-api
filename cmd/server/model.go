@@ -65,13 +65,41 @@ func NewErrorResponse(message string, status int) ErrorResponse {
 }
 
 type PaymentStore interface {
+	// Returns the payment with specified id.  If the payment does not exist in
+	// the store, `NotFoundError` is returned.
+	// error may also contain unexpected db driver errors.
 	GetPayment(id string) (*Payment, error)
+
+	// Returns a list of all payments.
+	// error may ontain unexpected db driver errors
 	GetAllPayments() ([]Payment, error)
+
+	// Creates a payment.  If payment.IdempotencyKey is set then that key will
+	// be used as a surrogate key to prevent multiple inserts of the same
+	// resource. If the resource already exists in the store, then a
+	// `DocumentConflictError` is returned in error.
+	//
+	// error may also contain unexpected db driver errors.
 	CreatePayment(payment *Payment) (*Payment, error)
+
+	// Updates a resource at payment.Id. If payment.Version is not equal to the
+	// current version held in the store then a `DocumentConflictError` is
+	// returned, but also the latest payment resource in the database for that
+	// Id is also returned in the Payment field.  These should be `nil`
+	// checked by callers.
+	// If the payment is not found, then a `NotFoundError` will be in the error
+	// response
+	// error may also contain unexpected db driver errors
 	UpdatePayment(payment *Payment) (*Payment, error)
+
+	// Deletes a payment from the store with specified id.
+	// If the id is not found then error will be `NotFoundError`. If
+	// successful, error will be `nil`.
+	// error may also contain unexpected db driver errors.
 	DeletePayment(id string) error
 }
 
+// Implements an "empty" payment store
 type EmptyPaymentStore struct{}
 
 func (s *EmptyPaymentStore) GetPayment(id string) (*Payment, error) {

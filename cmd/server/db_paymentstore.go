@@ -3,22 +3,22 @@ package main
 import (
 	"database/sql"
 	"database/sql/driver"
-    "encoding/json"
+	"encoding/json"
 	"errors"
 	"github.com/lib/pq"
 	"log"
-    "time"
+	"time"
 
-    "github.com/samgiles/health"
+	"github.com/samgiles/health"
 )
 
 type PostgresPaymentStore struct {
-    health.DefaultHealthCheck
+	health.DefaultHealthCheck
 	db *sql.DB
 }
 
 func NewPostgresPaymentStore(db *sql.DB) *PostgresPaymentStore {
-    return &PostgresPaymentStore{db: db}
+	return &PostgresPaymentStore{db: db}
 }
 
 func (s *PostgresPaymentStore) GetPayment(id string) (*Payment, error) {
@@ -167,22 +167,22 @@ func (s *PostgresPaymentStore) DeletePayment(id string) error {
 }
 
 func (s *PostgresPaymentStore) RunHealthCheck() health.HealthCheckResult {
-    // Using db.Ping is not enough, because they don't enter an error state
-    // after being opened until someone tries to execute something on that
-    // connection. With a healthcheck we'd prefer to be proactive
-    if _, err := s.GetAllPayments(); err != nil {
-        return health.NotReadyResult(err.Error())
-    }
+	// Using db.Ping is not enough, because they don't enter an error state
+	// after being opened until someone tries to execute something on that
+	// connection. With a healthcheck we'd prefer to be proactive
+	if _, err := s.GetAllPayments(); err != nil {
+		return health.NotReadyResult(err.Error())
+	}
 
-    return health.HealthyResult()
+	return health.HealthyResult()
 }
 
 func (s *PostgresPaymentStore) HealthCheckName() string {
-    return "postgresdb-health"
+	return "postgresdb-health"
 }
 
 func (s *PostgresPaymentStore) HealthCheckFrequency() time.Duration {
-    return 5 * time.Second
+	return 5 * time.Second
 }
 
 // Implement database/driver.Valuer and sql.Scanner interfaces for attributes

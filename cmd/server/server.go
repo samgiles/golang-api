@@ -17,7 +17,7 @@ type Server struct {
 	DB     *sql.DB
 
 	paymentController PaymentController
-    healthController health.HealthCheckController
+	healthController  health.HealthCheckController
 }
 
 func NewServer(db *sql.DB) *Server {
@@ -26,17 +26,17 @@ func NewServer(db *sql.DB) *Server {
 	server.DB = db
 	server.Router = mux.NewRouter()
 
-    paymentStore := NewPostgresPaymentStore(db)
+	paymentStore := NewPostgresPaymentStore(db)
 
 	server.paymentController = NewPaymentController(paymentStore)
 	server.paymentController.SetupRoutes(server.Router)
 
-    healthchecks := health.NewHealthCheckController()
-    healthchecks.AddHealthCheck(paymentStore)
-    server.healthController = healthchecks
+	healthchecks := health.NewHealthCheckController()
+	healthchecks.AddHealthCheck(paymentStore)
+	server.healthController = healthchecks
 
-    healthController := NewHealthController(healthchecks)
-    healthController.SetupRoutes(server.Router)
+	healthController := NewHealthController(healthchecks)
+	healthController.SetupRoutes(server.Router)
 
 	return &server
 }
