@@ -11,7 +11,7 @@ Body must be `application/json` with the following required fields:
 
 (I haven't listed possible payment attributes in the interest of time :) )
 
-Additionally an `X-Idempotency-Key` can be added to the header.  This allows
+Additionally an `X-Idempotency-Key` can be added to the request headers.  This allows
 the client to retry in the case of unexpected errors safe in the knowledge
 that the payment will only be created in the API once. The key should be a
 random generated value, a uuid-v4 is suggested.
